@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eAgenda.Infraestrutura.Compartilhado.Orm;
 
@@ -11,9 +12,11 @@ using eAgenda.Infraestrutura.Compartilhado.Orm;
 namespace eAgenda.Infraestrutura.Compartilhado.Orm.Migrations
 {
     [DbContext(typeof(EAgendaDbContext))]
-    partial class EAgendaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261008230116_Add_TBDespesas")]
+    partial class Add_TBDespesas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
