@@ -14,7 +14,6 @@ public sealed class ContatoController(ServicoContato servicoContato) : Controlle
         return View(dtos);
     }
 
-
     [HttpGet]
     public ActionResult Cadastrar()
     {
@@ -76,7 +75,6 @@ public sealed class ContatoController(ServicoContato servicoContato) : Controlle
         return View(viewModel);
     }
 
-
     [HttpPost]
     public ActionResult Editar(EditarContatoViewModel viewModel)
     {
@@ -105,7 +103,6 @@ public sealed class ContatoController(ServicoContato servicoContato) : Controlle
 
         return RedirectToAction(nameof(Listar));
     }
-
 
     [HttpGet]
     public ActionResult Excluir(Guid id)
