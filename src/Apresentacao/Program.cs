@@ -1,6 +1,8 @@
 using eAgenda.Aplicacao.Compartilhado;
 using eAgenda.Infraestrutura.Compartilhado;
+using eAgenda.Infraestrutura.Compartilhado.Identity;
 using eAgenda.Infraestrutura.Compartilhado.Orm;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +24,24 @@ builder.Services.AddControllersWithViews().AddRazorOptions(options =>
 
     // Localização das Views compartilhadas: /Compartilhado/Apresentacao/Views/_Layout.cshtml
     options.ViewLocationFormats.Add("/Compartilhado/Views/{0}.cshtml");
+});
+
+builder.Services.AddIdentity<UsuarioIdentity, IdentityRole<Guid>>(options =>
+{
+    options.User.RequireUniqueEmail = true;
+    options.Password.RequiredLength = 8;
+    options.Password.RequireDigit = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Lockout.AllowedForNewUsers = true;
+})
+.AddEntityFrameworkStores<EAgendaDbContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Autenticacao/Login";
+    options.AccessDeniedPath = "/Autenticacao/Login";
 });
 
 var app = builder.Build();
