@@ -14,7 +14,7 @@ public sealed class Tarefa : EntidadeBase<Tarefa>
 
     public Tarefa() { }
 
-    public Tarefa(string titulo, PrioridadeTarefa prioridade)
+    public Tarefa(string titulo, PrioridadeTarefa prioridade) : this()
     {
         Titulo = titulo;
         Prioridade = prioridade;
@@ -82,22 +82,10 @@ public sealed class Tarefa : EntidadeBase<Tarefa>
         List<ErroValidacao> erros = [];
 
         if (string.IsNullOrWhiteSpace(Titulo) || Titulo.Length < 2 || Titulo.Length > 100)
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Titulo),
-                Mensagem = "O campo \"Título\" deve conter entre 2 e 100 caracteres."
-            });
-        }
+            erros.Add(new(nameof(Titulo), "O campo \"Título\" deve conter entre 2 e 100 caracteres."));
 
         if (!Enum.IsDefined(Prioridade))
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Prioridade),
-                Mensagem = "O campo \"Prioridade\" deve ser preenchido."
-            });
-        }
+            erros.Add(new(nameof(Prioridade), "O campo \"Prioridade\" deve ser preenchido."));
 
         return erros;
     }

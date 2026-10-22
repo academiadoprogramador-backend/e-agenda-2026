@@ -19,22 +19,10 @@ public sealed class ServicoContato(IRepositorioContato repositorioContato)
         List<ErroValidacao> erros = contato.Validar();
 
         if (repositorioContato.ExisteContatoPorNome(contato.Nome))
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(dto.Nome),
-                Mensagem = "Já existe um contato cadastrado com o nome informado"
-            });
-        }
+            erros.Add(new(nameof(dto.Nome), "Já existe um contato cadastrado com o nome informado"));
 
         if (repositorioContato.ExisteContatoPorEmail(contato.Email))
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(dto.Email),
-                Mensagem = "Já existe um contato cadastrado com o email informado"
-            });
-        }
+            erros.Add(new(nameof(dto.Email), "Já existe um contato cadastrado com o email informado"));
 
         if (erros.Count > 0)
         {
@@ -62,22 +50,10 @@ public sealed class ServicoContato(IRepositorioContato repositorioContato)
         List<ErroValidacao> erros = contatoAtualizado.Validar();
 
         if (repositorioContato.ExisteContatoPorNome(contatoAtualizado.Nome, dto.Id))
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(dto.Nome),
-                Mensagem = "Já existe um contato cadastrado com o nome informado"
-            });
-        }
+            erros.Add(new(nameof(dto.Nome), "Já existe um contato cadastrado com o nome informado"));
 
         if (repositorioContato.ExisteContatoPorEmail(contatoAtualizado.Email, dto.Id))
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(dto.Email),
-                Mensagem = "Já existe um contato cadastrado com o email informado"
-            });
-        }
+            erros.Add(new(nameof(dto.Email), "Já existe um contato cadastrado com o email informado"));
 
         if (erros.Count > 0)
         {

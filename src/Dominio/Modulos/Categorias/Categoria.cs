@@ -20,22 +20,10 @@ public sealed class Categoria : EntidadeBase<Categoria>
         List<ErroValidacao> erros = [];
 
         if (string.IsNullOrWhiteSpace(Titulo))
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Titulo),
-                Mensagem = "O campo \"Título\" deve ser preenchido"
-            });
-        }
+            erros.Add(new(nameof(Titulo), "O campo \"Título\" deve ser preenchido"));
 
         if (Titulo?.Length < 2 || Titulo?.Length > 100)
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Titulo),
-                Mensagem = "O campo \"Título\" deve conter entre 2 e 100 caracteres"
-            });
-        }
+            erros.Add(new(nameof(Titulo), "O campo \"Título\" deve conter entre 2 e 100 caracteres"));
 
         return erros;
     }

@@ -34,22 +34,10 @@ public sealed class ItemTarefa : EntidadeBase<ItemTarefa>
         List<ErroValidacao> erros = [];
 
         if (string.IsNullOrWhiteSpace(Titulo) || Titulo.Length < 2 || Titulo.Length > 100)
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Titulo),
-                Mensagem = "O campo \"Título\" deve conter entre 2 e 100 caracteres."
-            });
-        }
+            erros.Add(new(nameof(Titulo), "O campo \"Título\" deve conter entre 2 e 100 caracteres."));
 
         if (Tarefa == null)
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Tarefa),
-                Mensagem = "O campo \"Tarefa\" deve conter uma tarefa válida."
-            });
-        }
+            erros.Add(new(nameof(Tarefa), "O campo \"Tarefa\" deve conter uma tarefa válida."));
 
         return erros;
     }

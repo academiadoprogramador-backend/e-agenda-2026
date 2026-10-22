@@ -1,17 +1,9 @@
 namespace eAgenda.Dominio.Compartilhado;
 
-public sealed class ErroValidacao
+public sealed class ErroValidacao(string campo, string mensagem)
 {
-    public string Campo { get; set; }
-    public string Mensagem { get; set; }
-
-    public ErroValidacao() { }
-
-    public ErroValidacao(string campo, string mensagem)
-    {
-        Campo = campo;
-        Mensagem = mensagem;
-    }
+    public string Campo { get; set; } = campo;
+    public string Mensagem { get; set; } = mensagem;
 }
 
 public abstract class EntidadeBase<T>

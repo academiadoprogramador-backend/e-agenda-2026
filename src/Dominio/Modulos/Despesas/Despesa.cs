@@ -20,7 +20,7 @@ public sealed class Despesa : EntidadeBase<Despesa>
         decimal valor,
         FormaPagamento formaPagamento,
         List<Categoria> categorias
-    )
+    ) : this()
     {
         Descricao = descricao ?? string.Empty;
         DataOcorrencia = dataOcorrencia;
@@ -34,40 +34,16 @@ public sealed class Despesa : EntidadeBase<Despesa>
         List<ErroValidacao> erros = [];
 
         if (string.IsNullOrWhiteSpace(Descricao) || Descricao.Length < 2 || Descricao.Length > 100)
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Descricao),
-                Mensagem = "O campo \"Descrição\" deve conter entre 2 e 100 caracteres."
-            });
-        }
+            erros.Add(new(nameof(Descricao), "O campo \"Descrição\" deve conter entre 2 e 100 caracteres."));
 
         if (DataOcorrencia == DateOnly.MinValue)
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(DataOcorrencia),
-                Mensagem = "O campo \"Data de Ocorrência\" deve conter uma data válida."
-            });
-        }
+            erros.Add(new(nameof(DataOcorrencia), "O campo \"Data de Ocorrência\" deve conter uma data válida."));
 
         if (Valor <= 0)
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Valor),
-                Mensagem = "O campo \"Valor\" deve conter um valor maior que 0."
-            });
-        }
+            erros.Add(new(nameof(Valor), "O campo \"Valor\" deve conter um valor maior que 0."));
 
         if (Categorias.Count == 0)
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(Categorias),
-                Mensagem = "O campo \"Categorias\" deve conter pelo menos um valor."
-            });
-        }
+            erros.Add(new(nameof(Categorias), "O campo \"Categorias\" deve conter pelo menos um valor."));
 
         return erros;
     }

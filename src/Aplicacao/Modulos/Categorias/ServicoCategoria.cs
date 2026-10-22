@@ -13,13 +13,7 @@ public sealed class ServicoCategoria(IRepositorioCategoria repositorioCategoria)
         List<ErroValidacao> erros = categoria.Validar();
 
         if (repositorioCategoria.ExisteCategoriaPorTitulo(categoria.Titulo))
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(dto.Titulo),
-                Mensagem = "Já existe uma categoria cadastrada com o título informado"
-            });
-        }
+            erros.Add(new(nameof(dto.Titulo), "Já existe uma categoria cadastrada com o título informado"));
 
         if (erros.Count > 0)
         {
@@ -41,13 +35,7 @@ public sealed class ServicoCategoria(IRepositorioCategoria repositorioCategoria)
         List<ErroValidacao> erros = categoriaAtualizada.Validar();
 
         if (repositorioCategoria.ExisteCategoriaPorTitulo(categoriaAtualizada.Titulo, dto.Id))
-        {
-            erros.Add(new ErroValidacao
-            {
-                Campo = nameof(categoriaAtualizada.Titulo),
-                Mensagem = "Já existe uma categoria cadastrada com o título informado"
-            });
-        }
+            erros.Add(new(nameof(categoriaAtualizada.Titulo), "Já existe uma categoria cadastrada com o título informado"));
 
         if (erros.Count > 0)
         {
