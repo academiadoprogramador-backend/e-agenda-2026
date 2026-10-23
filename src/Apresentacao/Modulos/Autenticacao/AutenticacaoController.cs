@@ -1,5 +1,6 @@
 using eAgenda.Infraestrutura.Compartilhado.Identity;
 using eAgenda.WebApp.Compartilhado;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,16 +11,23 @@ public class AutenticacaoController(
     SignInManager<UsuarioIdentity> signInManager // responsável pelo login/logout de usuários já criados
 ) : Controller
 {
-
     [HttpGet]
+    [AllowAnonymous]
     public ActionResult Cadastro()
     {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+
         return View(new CadastroUsuarioViewModel(string.Empty, string.Empty));
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<ActionResult> Cadastro(CadastroUsuarioViewModel viewModel)
     {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+
         if (!ModelState.IsValid)
             return View(viewModel);
 
@@ -44,8 +52,12 @@ public class AutenticacaoController(
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public ActionResult Login(string? returnUrl = null)
     {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+
         LoginUsuarioViewModel viewModel = new(
             string.Empty,
             string.Empty,
@@ -57,8 +69,12 @@ public class AutenticacaoController(
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<ActionResult> Login(LoginUsuarioViewModel viewModel)
     {
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction(nameof(HomeController.Index), "Home");
+
         if (!ModelState.IsValid)
             return View(viewModel);
 
@@ -82,6 +98,7 @@ public class AutenticacaoController(
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<ActionResult> Logout()
     {
         await signInManager.SignOutAsync();

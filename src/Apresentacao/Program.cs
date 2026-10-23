@@ -2,6 +2,7 @@ using eAgenda.Aplicacao.Compartilhado;
 using eAgenda.Infraestrutura.Compartilhado;
 using eAgenda.Infraestrutura.Compartilhado.Identity;
 using eAgenda.Infraestrutura.Compartilhado.Orm;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,6 +45,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Autenticacao/Login";
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser().Build();
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -57,6 +64,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapDefaultControllerRoute();
 
 app.Run();
