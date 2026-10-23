@@ -27,6 +27,8 @@ public sealed class EAgendaDbContext(DbContextOptions<EAgendaDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.ApplyConfiguration(new CategoriaConfiguration());
         modelBuilder.ApplyConfiguration(new DespesaConfiguration());
         modelBuilder.ApplyConfiguration(new TarefaConfiguration());
