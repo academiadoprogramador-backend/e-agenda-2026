@@ -1,4 +1,5 @@
 using eAgenda.Dominio.Modulos.Contatos;
+using eAgenda.Infraestrutura.Compartilhado.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -34,10 +35,15 @@ public sealed class ContatoConfiguration : IEntityTypeConfiguration<Contato>
             .HasMaxLength(100);
 
         // Índice de exclusividade
-        builder.HasIndex(c => c.Email)
+        builder.HasIndex(c => new { c.UsuarioId, c.Email })
             .IsUnique();
 
-        builder.HasIndex(c => c.Telefone)
+        builder.HasIndex(c => new { c.UsuarioId, c.Telefone })
             .IsUnique();
+
+        builder.HasOne<UsuarioIdentity>()
+            .WithMany()
+            .HasForeignKey(c => c.UsuarioId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

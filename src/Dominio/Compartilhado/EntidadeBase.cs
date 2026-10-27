@@ -9,6 +9,7 @@ public sealed class ErroValidacao(string campo, string mensagem)
 public abstract class EntidadeBase<T>
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
+    public Guid UsuarioId { get; set; } = Guid.Empty;
     public abstract List<ErroValidacao> Validar();
     public abstract void Atualizar(T entidadeAtualizada);
 }
