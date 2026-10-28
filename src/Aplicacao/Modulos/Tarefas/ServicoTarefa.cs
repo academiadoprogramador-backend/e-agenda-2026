@@ -9,6 +9,7 @@ public sealed class ServicoTarefa(IRepositorioTarefa repositorioTarefa)
     public Result<Guid> Cadastrar(CadastrarTarefaDto dto)
     {
         Tarefa tarefa = new(dto.Titulo, dto.Prioridade);
+        tarefa.UsuarioId = dto.UsuarioId;
 
         List<ErroValidacao> erros = tarefa.Validar();
 
@@ -65,6 +66,7 @@ public sealed class ServicoTarefa(IRepositorioTarefa repositorioTarefa)
             return Result.Fail("Tarefa não encontrada.");
 
         ItemTarefa novoItem = new(tarefa, dto.Titulo);
+        novoItem.UsuarioId = tarefa.UsuarioId;
 
         List<ErroValidacao> erros = novoItem.Validar();
 

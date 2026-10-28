@@ -15,6 +15,7 @@ public sealed class ServicoContato(IRepositorioContato repositorioContato)
             dto.Cargo,
             dto.Empresa
         );
+        contato.UsuarioId = dto.UsuarioId;
 
         List<ErroValidacao> erros = contato.Validar();
 

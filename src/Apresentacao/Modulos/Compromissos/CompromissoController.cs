@@ -1,5 +1,6 @@
 using eAgenda.Aplicacao.Modulos.Compromissos;
 using eAgenda.Aplicacao.Modulos.Contatos;
+using eAgenda.Dominio.Compartilhado;
 using eAgenda.Dominio.Modulos.Compromissos;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,8 @@ namespace eAgenda.WebApp.Modulos.Compromissos;
 
 public class CompromissoController(
     ServicoCompromisso servicoCompromisso,
-    ServicoContato servicoContato
+    ServicoContato servicoContato,
+    IProvedorUsuarioAtual usuarioAtual
 ) : Controller
 {
     [HttpGet]
@@ -43,6 +45,7 @@ public class CompromissoController(
             return View(cadastrarVm);
 
         CadastrarCompromissoDto dto = new(
+            usuarioAtual.Id,
             cadastrarVm.Assunto,
             cadastrarVm.DataOcorrencia,
             cadastrarVm.HoraInicio,

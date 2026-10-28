@@ -39,7 +39,12 @@ public sealed class EAgendaDbContext(
         modelBuilder.ApplyConfiguration(new ContatoConfiguration());
         modelBuilder.ApplyConfiguration(new CompromissoConfiguration());
 
-        // QueryFilter aplica um filtro global
+        // QueryFilter aplica um filtro global para isolar os dados de cada usuário.
         modelBuilder.Entity<Categoria>().HasQueryFilter(c => c.UsuarioId == usuarioAtual.Id);
+        modelBuilder.Entity<Despesa>().HasQueryFilter(c => c.UsuarioId == usuarioAtual.Id);
+        modelBuilder.Entity<Tarefa>().HasQueryFilter(c => c.UsuarioId == usuarioAtual.Id);
+        modelBuilder.Entity<ItemTarefa>().HasQueryFilter(c => c.UsuarioId == usuarioAtual.Id);
+        modelBuilder.Entity<Contato>().HasQueryFilter(c => c.UsuarioId == usuarioAtual.Id);
+        modelBuilder.Entity<Compromisso>().HasQueryFilter(c => c.UsuarioId == usuarioAtual.Id);
     }
 }

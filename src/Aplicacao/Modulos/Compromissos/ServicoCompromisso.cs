@@ -27,6 +27,7 @@ public sealed class ServicoCompromisso(
             dto.Link,
             contatoSelecionado
         );
+        compromisso.UsuarioId = dto.UsuarioId;
 
         List<ErroValidacao> erros = compromisso.Validar();
 

@@ -10,6 +10,7 @@ public record ContatoDto(
 );
 
 public record CadastrarContatoDto(
+    Guid UsuarioId,
     string Nome,
     string Email,
     string Telefone,

@@ -1,10 +1,11 @@
 using eAgenda.Aplicacao.Modulos.Contatos;
+using eAgenda.Dominio.Compartilhado;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace eAgenda.WebApp.Modulos.Contatos;
 
-public sealed class ContatoController(ServicoContato servicoContato) : Controller
+public sealed class ContatoController(ServicoContato servicoContato, IProvedorUsuarioAtual usuarioAtual) : Controller
 {
     [HttpGet]
     public ActionResult Listar()
@@ -34,7 +35,7 @@ public sealed class ContatoController(ServicoContato servicoContato) : Controlle
         if (!ModelState.IsValid)
             return View(cadastrarVm);
 
-        CadastrarContatoDto dto = new(cadastrarVm.Nome, cadastrarVm.Email, cadastrarVm.Telefone, cadastrarVm.Cargo, cadastrarVm.Empresa);
+        CadastrarContatoDto dto = new(usuarioAtual.Id, cadastrarVm.Nome, cadastrarVm.Email, cadastrarVm.Telefone, cadastrarVm.Cargo, cadastrarVm.Empresa);
 
         Result<Guid> resultado = servicoContato.Cadastrar(dto);
 

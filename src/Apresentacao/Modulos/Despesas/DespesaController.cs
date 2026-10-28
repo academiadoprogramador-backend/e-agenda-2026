@@ -1,5 +1,6 @@
 using eAgenda.Aplicacao.Modulos.Categorias;
 using eAgenda.Aplicacao.Modulos.Despesas;
+using eAgenda.Dominio.Compartilhado;
 using eAgenda.Dominio.Modulos.Despesas;
 using FluentResults;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,8 @@ namespace eAgenda.WebApp.Modulos.Despesas;
 
 public sealed class DespesaController(
     ServicoDespesa servicoDespesa,
-    ServicoCategoria servicoCategoria
+    ServicoCategoria servicoCategoria,
+    IProvedorUsuarioAtual usuarioAtual
 ) : Controller
 {
     [HttpGet]
@@ -42,6 +44,7 @@ public sealed class DespesaController(
     public ActionResult Cadastrar(CadastrarDespesaViewModel viewModel)
     {
         CadastrarDespesaDto dto = new(
+            usuarioAtual.Id,
             viewModel.Descricao,
             viewModel.DataOcorrencia,
             viewModel.Valor,
