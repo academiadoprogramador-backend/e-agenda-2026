@@ -105,4 +105,24 @@ public sealed class RepositorioCompromissoEmOrmTests : RepositorioEmOrmTestsBase
         Assert.IsNotNull(compromissoSelecionado.Contato);
         Assert.AreEqual(contato, compromissoSelecionado.Contato);
     }
+
+    [TestMethod]
+    public void Editar_DevePersistir_Compromisso_ComContatoNoBanco()
+    {
+        // Arranjo
+
+        // Ação
+
+        // Asserção
+    }
+
+    [TestMethod]
+    public void Excluir_DevePersistir_CompromissoNoBanco()
+    {
+        // Arranjo
+
+        // Ação
+
+        // Asserção
+    }
 }
