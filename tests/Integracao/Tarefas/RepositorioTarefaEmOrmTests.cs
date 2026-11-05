@@ -94,9 +94,32 @@ public sealed partial class RepositorioTarefaEmOrmTests : RepositorioEmOrmTestsB
     public void Excluir_DeveApagar_TarefaEItensNoBanco()
     {
         // Arranjo
+        Guid tarefaId = Guid.CreateVersion7();
+
+        Tarefa tarefaOriginal = new("Preparar Apresentação", PrioridadeTarefa.Alta)
+        {
+            Id = tarefaId,
+            UsuarioId = usuarioId,
+            DataCriacao = new DateOnly(2026, 11, 03)
+        };
+
+        tarefaOriginal.AdicionarItem(new ItemTarefa(tarefaOriginal, "Revisar conteúdo") { UsuarioId = usuarioId });
+
+        RepositorioTarefaEmOrm repositorioTarefa = new(dbContext);
+
+        repositorioTarefa.Cadastrar(tarefaOriginal);
+        dbContext.ChangeTracker.Clear();
 
         // Ação
+        bool conseguiuExcluir = repositorioTarefa.Excluir(tarefaId);
+        dbContext.ChangeTracker.Clear();
+
+        Tarefa? tarefaSelecionada = repositorioTarefa.SelecionarPorId(tarefaId);
+        int quantidadeItensTarefa = dbContext.ItensTarefa.Count(i => i.TarefaId == tarefaId);
 
         // Asserção
+        Assert.IsTrue(conseguiuExcluir);
+        Assert.IsNull(tarefaSelecionada);
+        Assert.AreEqual(0, quantidadeItensTarefa);
     }
 }
