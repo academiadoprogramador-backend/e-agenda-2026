@@ -1,4 +1,3 @@
-using System;
 using eAgenda.Dominio.Modulos.Despesas;
 using eAgenda.Infraestrutura.Compartilhado.Identity;
 using Microsoft.EntityFrameworkCore;
