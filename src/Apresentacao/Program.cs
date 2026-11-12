@@ -57,7 +57,7 @@ builder.Services.AddScoped<IProvedorUsuarioAtual, ProvedorUsuarioAtualHttp>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
 {
     using var scope = app.Services.CreateScope();
 
