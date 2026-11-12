@@ -14,17 +14,31 @@ public sealed class TestApplicationFactory : WebApplicationFactory<Program>
 
     public async Task StartAsync()
     {
-        UseKestrel(0);
+        StartupTestServer();
 
+        await CleanupTestDatabaseAsync();
+    }
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.UseEnvironment("Testing");
+    }
+
+    private void StartupTestServer()
+    {
+        UseKestrel(0);
         StartServer();
 
-        IServer servidor = Services.GetRequiredService<IServer>();
+        IServer server = Services.GetRequiredService<IServer>();
 
-        IServerAddressesFeature? enderecos = servidor.Features.Get<IServerAddressesFeature>()
+        IServerAddressesFeature? serverAdressesFeature = server.Features.Get<IServerAddressesFeature>()
             ?? throw new InvalidOperationException("Não foi possível obter a URL do servidor");
 
-        BaseUrl = enderecos.Addresses.Single();
+        BaseUrl = serverAdressesFeature.Addresses.Single();
+    }
 
+    private async Task CleanupTestDatabaseAsync()
+    {
         using var scope = Services.CreateScope();
         EAgendaDbContext dbContext = scope.ServiceProvider.GetRequiredService<EAgendaDbContext>();
 
@@ -39,10 +53,5 @@ public sealed class TestApplicationFactory : WebApplicationFactory<Program>
         dbContext.Users.RemoveRange(dbContext.Users);
 
         await dbContext.SaveChangesAsync();
-    }
-
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
-    {
-        builder.UseEnvironment("Testing");
     }
 }

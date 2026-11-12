@@ -70,4 +70,9 @@ public sealed class Contato : EntidadeBase<Contato>
             Cargo == contato.Cargo &&
             Empresa == contato.Empresa;
     }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Nome, Email, Telefone, Cargo, Empresa);
+    }
 }
