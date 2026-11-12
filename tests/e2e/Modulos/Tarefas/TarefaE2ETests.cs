@@ -36,13 +36,20 @@ public sealed class TarefaE2ETests
     {
         await browser.DisposeAsync();
         playwright.Dispose();
+
+        await applicationFactory.DisposeAsync();
     }
 
     [TestMethod]
     public async Task Deve_Cadastrar_Tarefa_Corretamente()
     {
         // Arranjo
-        await page.GotoAsync($"{baseUrl}/Autenticacao/Login");
+        await page.GotoAsync($"{baseUrl}/Autenticacao/Cadastro");
+
+        await page.GetByLabel("E-mail").FillAsync("tiago@academiadoprogramador.net");
+        await page.GetByLabel("Senha", new() { Exact = true }).FillAsync("Teste@123");
+        await page.GetByLabel("Confirmar Senha", new() { Exact = true }).FillAsync("Teste@123");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Cadastrar" }).ClickAsync();
 
         await page.GetByLabel("E-mail").FillAsync("tiago@academiadoprogramador.net");
         await page.GetByLabel("Senha").FillAsync("Teste@123");
@@ -59,7 +66,7 @@ public sealed class TarefaE2ETests
         ILocator card = page.Locator(".card").Filter(new() { HasText = "Lavar o cachorro" });
 
         // Asserção
-        Assert.IsTrue(await card.First.IsVisibleAsync());
+        await Assertions.Expect(card).ToBeVisibleAsync();
     }
 
     [TestMethod]
