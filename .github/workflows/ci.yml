@@ -1,0 +1,133 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - e2e-final
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v7
+
+      - name: Configurar .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar cache de pacotes NuGet
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'eAgenda.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restaurar dependências
+        run: dotnet restore eAgenda.slnx
+
+      - name: Compilar solução
+        run: dotnet build eAgenda.slnx --configuration Release --no-restore
+
+  testes:
+    name: Testes
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    env:
+      # Senha fixa do SQL Server usado pelos containers de teste (mesma dos appsettings)
+      MSSQL_SA_PASSWORD: "Academia@2026!"
+      # O navegador roda em modo headless no CI (sem necessidade de display virtual)
+      PLAYWRIGHT_HEADLESS: "true"
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v7
+
+      - name: Configurar .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar cache de pacotes NuGet
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'eAgenda.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Executar testes de unidade
+        run: >
+          dotnet test tests/Unidade/eAgenda.Testes.Unidade.csproj
+          --configuration Release
+          --logger "trx;LogFileName=testes-unidade.trx"
+          --results-directory TestResults
+
+      - name: Subir infraestrutura (SQL Server) e aguardar
+        run: |
+          docker compose up -d
+
+          for tentativa in $(seq 1 60); do
+            if docker compose logs sqlserver 2>&1 | grep -q "SQL Server is now ready for client connections"; then
+              echo "SQL Server pronto para receber conexões."
+              exit 0
+            fi
+            sleep 3
+          done
+
+          echo "::error::O SQL Server não ficou pronto a tempo."
+          docker compose logs sqlserver
+          exit 1
+
+      - name: Executar testes de integração
+        run: >
+          dotnet test tests/Integracao/eAgenda.Testes.Integracao.csproj
+          --configuration Release
+          --logger "trx;LogFileName=testes-integracao.trx"
+          --results-directory TestResults
+
+      - name: Compilar projeto de testes e2e
+        run: dotnet build tests/e2e/eAgenda.Testes.e2e.csproj --configuration Release
+
+      - name: Instalar navegador do Playwright
+        run: pwsh tests/e2e/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      - name: Executar testes e2e
+        run: >
+          dotnet test tests/e2e/eAgenda.Testes.e2e.csproj
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=testes-e2e.trx"
+          --results-directory TestResults
+
+      - name: Publicar resultados dos testes
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-testes
+          path: TestResults
+          if-no-files-found: ignore
+
+      - name: Encerrar infraestrutura
+        if: always()
+        run: docker compose down --volumes

@@ -11,6 +11,21 @@ public abstract class E2ETestsBase
     protected IPage page = null!;
     protected string? baseUrl = null;
 
+    // Em CI o navegador roda em modo headless; localmente abre a interface para facilitar a depuração.
+    // Use PLAYWRIGHT_HEADLESS=true/false para forçar o modo desejado.
+    private static bool ModoHeadless
+    {
+        get
+        {
+            string? configuracao = Environment.GetEnvironmentVariable("PLAYWRIGHT_HEADLESS");
+
+            if (bool.TryParse(configuracao, out bool headless))
+                return headless;
+
+            return string.Equals(Environment.GetEnvironmentVariable("CI"), "true", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
     [TestInitialize]
     public async Task InicializarTeste()
     {
@@ -22,7 +37,7 @@ public abstract class E2ETestsBase
         playwright = await Playwright.CreateAsync();
         browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Headless = false
+            Headless = ModoHeadless
         });
         browserContext = await browser.NewContextAsync();
         page = await browserContext.NewPageAsync();
