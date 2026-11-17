@@ -77,3 +77,10 @@ jobs:
           --configuration Release
           --logger "trx;LogFileName=testes-unidade.trx"
           --results-directory TestResults
+
+      - name: Executar testes de integração
+        run: >
+          dotnet test tests/Integracao/eAgenda.Testes.Integracao.csproj
+          --configuration Release
+          --logger "trx;LogFileName=testes-integracao.trx"
+          --results-directory TestResults
