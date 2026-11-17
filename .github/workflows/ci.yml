@@ -47,3 +47,33 @@ jobs:
 
       - name: Compilar solução
         run: dotnet build eAgenda.slnx --configuration Release --no-restore
+
+  test:
+    name: Testes
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v7
+
+      - name: Configurar .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar o cache de pacotes Nuget
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'eAgenda.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Executar testes de unidade
+        run: >
+          dotnet test tests/Unidade/eAgenda.Testes.Unidade.csproj
+          --configuration Release
+          --logger "trx;LogFileName=testes-unidade.trx"
+          --results-directory TestResults
