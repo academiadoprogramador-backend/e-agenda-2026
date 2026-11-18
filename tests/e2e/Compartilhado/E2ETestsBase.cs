@@ -11,6 +11,19 @@ public abstract class E2ETestsBase
     protected IPage page = null!;
     protected string? baseUrl = null;
 
+    private static bool ModoHeadless
+    {
+        get
+        {
+            string? configuracao = Environment.GetEnvironmentVariable("PLAYWRIGHT_HEADLESS");
+
+            if (bool.TryParse(configuracao, out bool headless))
+                return true;
+
+            return false;
+        }
+    }
+
     [TestInitialize]
     public async Task InicializarTeste()
     {
@@ -22,7 +35,7 @@ public abstract class E2ETestsBase
         playwright = await Playwright.CreateAsync();
         browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
         {
-            Headless = false
+            Headless = ModoHeadless
         });
 
         browserContext = await browser.NewContextAsync();

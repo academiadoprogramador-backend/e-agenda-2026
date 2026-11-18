@@ -56,6 +56,7 @@ jobs:
 
     env:
       MSSQL_SA_PASSWORD: "Academia@2026!"
+      PLAYWRIGHT_HEADLESS: "true"
 
     steps:
       - name: Checkout do código
@@ -102,6 +103,20 @@ jobs:
           dotnet test tests/Integracao/eAgenda.Testes.Integracao.csproj
           --configuration Release
           --logger "trx;LogFileName=testes-integracao.trx"
+          --results-directory TestResults
+
+      - name: Compilar projetos de testes e2e
+        run: dotnet build tests/e2e/eAgenda.Testes.e2e.csproj --configuration Release
+
+      - name: Instalar navegador do Playwright
+        run: pwsh tests/e2e/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      - name: Executar testes e2e
+        run: >
+          dotnet test tests/e2e/eAgenda.Testes.e2e.csproj
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=testes-e2e.trx"
           --results-directory TestResults
 
       - name: Publicar resultados dos testes
