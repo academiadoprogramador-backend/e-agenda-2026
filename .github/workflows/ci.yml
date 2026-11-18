@@ -103,3 +103,15 @@ jobs:
           --configuration Release
           --logger "trx;LogFileName=testes-integracao.trx"
           --results-directory TestResults
+
+      - name: Publicar resultados dos testes
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-testes
+          path: TestResults
+          if-no-files-found: ignore
+
+      - name: Encerrar infraestrutura SQL Server
+        if: always()
+        run: docker compose down -v
