@@ -54,6 +54,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    env:
+      MSSQL_SA_PASSWORD: "Academia@2026!"
+
     steps:
       - name: Checkout do código
         uses: actions/checkout@v7
