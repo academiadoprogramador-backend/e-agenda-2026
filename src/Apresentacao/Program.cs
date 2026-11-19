@@ -58,7 +58,7 @@ builder.Services.AddScoped<IProvedorUsuarioAtual, ProvedorUsuarioAtualHttp>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment() || app.Environment.IsTesting())
+// Executa migrações em qualquer ambiente
 {
     using var scope = app.Services.CreateScope();
 
