@@ -123,8 +123,7 @@ jobs:
       - name: Aplicar migrações pendentes
         run: |
           dotnet ef database update `
-            --startup-project "src/Apresentacao/eAgenda.WebApp.csproj" `
-            --project "src/Infraestrutura/eAgenda.Infraestrutura.csproj" `
+            --project "src/Apresentacao/eAgenda.WebApp.csproj" `
             --configuration Release `
             --connection "${{ secrets.SQLSERVER_CONNECTION_STRING }}"
 
