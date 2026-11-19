@@ -9,6 +9,12 @@ on:
       - "main"
   workflow_dispatch:
 
+env:
+  DOTNET_VERSION: "10.0.x"
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+
 jobs:
   build:
     runs-on: windows-latest
@@ -35,9 +41,8 @@ jobs:
         run: dotnet build --configuration Release
 
   test:
-    name: Testes
     needs: build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
@@ -107,6 +112,10 @@ jobs:
           --logger "trx;LogFileName=testes-e2e.trx"
           --results-directory TestResults
 
+      - name: Encerrar infraestrutura SQL Server
+        if: always()
+        run: docker compose down -v
+
       - name: Publicar resultados dos testes
         if: always()
         uses: actions/upload-artifact@v7
@@ -114,10 +123,6 @@ jobs:
           name: resultados-testes
           path: TestResults
           if-no-files-found: ignore
-
-      - name: Encerrar infraestrutura SQL Server
-        if: always()
-        run: docker compose down -v
 
   publish:
     runs-on: windows-latest
