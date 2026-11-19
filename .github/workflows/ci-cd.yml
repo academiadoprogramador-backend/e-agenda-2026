@@ -1,0 +1,180 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Integração Continua e Entrega Contínua
+
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.x"
+
+      - name: Restaurar o cache de pacotes Nuget
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'eAgenda.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+  test:
+    name: Testes
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    env:
+      MSSQL_SA_PASSWORD: "Academia@2026!"
+      PLAYWRIGHT_HEADLESS: "true"
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v7
+
+      - name: Configurar .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar o cache de pacotes Nuget
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'eAgenda.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Executar testes de unidade
+        run: >
+          dotnet test tests/Unidade/eAgenda.Testes.Unidade.csproj
+          --configuration Release
+          --logger "trx;LogFileName=testes-unidade.trx"
+          --results-directory TestResults
+
+      - name: Subir infraestrutura SQL Server
+        run: |
+          docker compose up -d
+
+          for tentativa in $(seq 1 5); do
+            if docker compose logs sqlserver 2>&1 | grep -q "SQL Server is now ready for client connections"; then
+              echo "SQL Server pronto para receber conexões."
+              exit 0
+            fi
+            sleep 3
+          done
+
+          echo "::error::O SQL Server não ficou pronto a tempo."
+          docker compose logs sqlserver
+          exit 1
+
+      - name: Executar testes de integração
+        run: >
+          dotnet test tests/Integracao/eAgenda.Testes.Integracao.csproj
+          --configuration Release
+          --logger "trx;LogFileName=testes-integracao.trx"
+          --results-directory TestResults
+
+      - name: Compilar projetos de testes e2e
+        run: dotnet build tests/e2e/eAgenda.Testes.e2e.csproj --configuration Release
+
+      - name: Instalar navegador do Playwright
+        run: pwsh tests/e2e/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      - name: Executar testes e2e
+        run: >
+          dotnet test tests/e2e/eAgenda.Testes.e2e.csproj
+          --configuration Release
+          --no-build
+          --logger "trx;LogFileName=testes-e2e.trx"
+          --results-directory TestResults
+
+      - name: Publicar resultados dos testes
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-testes
+          path: TestResults
+          if-no-files-found: ignore
+
+      - name: Encerrar infraestrutura SQL Server
+        if: always()
+        run: docker compose down -v
+
+  publish:
+    runs-on: windows-latest
+    needs: [build, test]
+    permissions:
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v7
+
+      - name: Configurar .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar o cache de pacotes Nuget
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'eAgenda.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Publicar aplicação .NET
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: [build, test, publish]
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Baixar o artefato do job de Testes
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      - name: Fazer Login na Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_3B2CBEE345434AA684EA97112E45076A }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_63E528D515AD40689A9836FBB0D13B64 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_53A7A9AC7B454F4F9A41BE05DCC55A14 }}
+
+      - name: Deploy para Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "e-agenda-backend-2026"
+          slot-name: "Production"
+          package: .
