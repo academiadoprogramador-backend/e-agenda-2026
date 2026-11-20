@@ -35,15 +35,15 @@ jobs:
       - name: Configurar .NET Core
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: "10.x"
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restaurar o cache de pacotes Nuget
         uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', 'eAgenda.slnx') }}
+          key: ${{ runner.os }}-${{ runner.arch }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json', '**/Directory.Packages.props', '**/Directory.Build.props', '**/Directory.Build.targets', '**/NuGet.Config', '**/nuget.config', 'global.json', 'eAgenda.slnx') }}
           restore-keys: |
-            ${{ runner.os }}-nuget-
+            ${{ runner.os }}-${{ runner.arch }}-nuget-
 
       - name: Build with dotnet
         run: |
@@ -107,7 +107,10 @@ jobs:
           if-no-files-found: ignore
 
   migrate:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
     needs: build-and-test
     permissions:
       contents: read
@@ -121,13 +124,21 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Restaurar o cache de pacotes Nuget
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-${{ runner.arch }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json', '**/Directory.Packages.props', '**/Directory.Build.props', '**/Directory.Build.targets', '**/NuGet.Config', '**/nuget.config', 'global.json', 'eAgenda.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-nuget-
+
       - name: Restaurar dependências
         run: |
           dotnet restore src/Apresentacao/eAgenda.WebApp.csproj
 
       - name: Instalar o Entity Framework CLI
         run: |
-          dotnet tool install --global dotnet-ef
+          dotnet tool install --global dotnet-ef --version 10.0.13
 
       - name: Aplicar migrações pendentes
         env:
@@ -152,6 +163,14 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restaurar o cache de pacotes Nuget
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-${{ runner.arch }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json', '**/Directory.Packages.props', '**/Directory.Build.props', '**/Directory.Build.targets', '**/NuGet.Config', '**/nuget.config', 'global.json', 'eAgenda.slnx') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-nuget-
 
       - name: Publicar aplicação .NET
         run: |
