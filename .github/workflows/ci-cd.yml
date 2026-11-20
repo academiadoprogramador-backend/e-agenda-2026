@@ -181,7 +181,7 @@ jobs:
             --output ./publish
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: .net-app
           path: ./publish
@@ -195,12 +195,12 @@ jobs:
 
     steps:
       - name: Baixar o artefato do job publish
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: .net-app
 
       - name: Fazer Login na Azure
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_3B2CBEE345434AA684EA97112E45076A }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_63E528D515AD40689A9836FBB0D13B64 }}
